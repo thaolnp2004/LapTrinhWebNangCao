@@ -1,0 +1,20 @@
+# Thông tin nhạy cảm — KHÔNG commit
+config/secrets.php
+config/bi_mat.php
+client_secret*.json
+
+# Upload của người dùng
+uploads/avatars/*
+uploads/products/*
+!uploads/avatars/.gitkeep
+!uploads/products/.gitkeep
+
+tai_len/*
+!tai_len/.gitkeep
+
+# Hệ thống
+.DS_Store
+Thumbs.db
+*.log
+
+config/thanh_toan.local.php

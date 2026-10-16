@@ -1,0 +1,3 @@
+<?php include ROOT_PATH.'/views/bo_cuc/dau_trang.php'; ?>
+<article class="container sun-content-page"><span class="sun-eyebrow">SUN COSMETIC / WITH LOVE</span><h1><?= htmlspecialchars($pageTitle) ?></h1><?php if(($slug ?? '')==='about'): ?><img src="<?= ASSETS_URL ?>/images/sun-hero.png" alt="Mỹ phẩm Sun Cosmetic cùng hoa và ánh nắng"><?php endif; ?><?= $content ?><p class="mt-4">Liên hệ Sun: <a href="mailto:<?= SHOP_EMAIL ?>"><?= SHOP_EMAIL ?></a>.</p><a class="sun-btn" href="<?= SITE_URL ?>/products">Khám phá mỹ phẩm <i class="fas fa-arrow-right"></i></a></article>
+<?php include ROOT_PATH.'/views/bo_cuc/chan_trang.php'; ?>
