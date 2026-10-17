@@ -9,7 +9,10 @@ define('SITE_NAME', 'Sun Cosmetic');
 require_once __DIR__.'/url_site.php';
 define('SITE_URL', sunSiteUrl());
 define('SHOP_EMAIL', 'thaolnpt04102004@gmail.com');
-define('SHOP_STORAGE', 'C:/xampp/sun_cosmetic_work/storage');
+define(
+    'SHOP_STORAGE',
+    getenv('SUN_SHOP_STORAGE') ?: sys_get_temp_dir() . '/sun_cosmetic'
+);
 require_once __DIR__.'/thanh_toan.php';
 define('ADMIN_URL', SITE_URL . '/admin');
 define('UPLOAD_URL', SITE_URL . '/tai_len');
@@ -20,8 +23,44 @@ define('ROOT_PATH', dirname(__DIR__));
 define('UPLOAD_PATH', ROOT_PATH . '/tai_len');
 define('ADMIN_PATH', ROOT_PATH . '/admin');
 
-// ===== Secrets (không commit lên Git) =====
-require_once __DIR__ . '/bi_mat.php';
+// ===== Secrets / Production Environment =====
+$localSecrets = __DIR__ . '/bi_mat.php';
+
+if (is_file($localSecrets)) {
+    // Local XAMPP
+    require_once $localSecrets;
+} else {
+    // Heroku
+    $dbUrl = getenv('JAWSDB_URL') ?: getenv('JAWSDB_MARIA_URL');
+
+    if (!$dbUrl) {
+        throw new RuntimeException('Missing JawsDB configuration.');
+    }
+
+    $db = parse_url($dbUrl);
+
+    define('DB_HOST', $db['host']);
+    define('DB_PORT', $db['port'] ?? 3306);
+    define('DB_NAME', ltrim($db['path'], '/'));
+    define('DB_USER', $db['user']);
+    define('DB_PASS', $db['pass']);
+    define('DB_CHARSET', 'utf8mb4');
+
+    define('SMTP_USER', getenv('SUN_SMTP_USER') ?: SHOP_EMAIL);
+    define('SMTP_PASS', getenv('SUN_SMTP_PASS') ?: '');
+    define('SMTP_NOREPLY_USER', getenv('SUN_SMTP_USER') ?: SHOP_EMAIL);
+    define('SMTP_NOREPLY_PASS', getenv('SUN_SMTP_PASS') ?: '');
+    define('MAIL_FROM', getenv('SUN_SMTP_USER') ?: SHOP_EMAIL);
+
+    require_once __DIR__ . '/google_oauth.php';
+
+    $sunGoogle = sunGoogleOAuthCredentials();
+
+    define('GOOGLE_CLIENT_ID', $sunGoogle['client_id']);
+    define('GOOGLE_CLIENT_SECRET', $sunGoogle['client_secret']);
+
+    unset($sunGoogle);
+}
 
 // ===== Other Settings =====
 define('LOW_STOCK_WARNING', 5);
@@ -35,7 +74,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ===== Error Reporting (set false in production) =====
-define('DEBUG', true);
+$debugEnv = getenv('SUN_DEBUG');
+define('DEBUG', $debugEnv === false ? true : $debugEnv === '1');
 if (DEBUG) {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
@@ -63,7 +103,13 @@ class Database
 
     private function __construct()
     {
-        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+        $port = defined('DB_PORT') ? DB_PORT : 3306;
+
+        $dsn = "mysql:host=" . DB_HOST .
+       ";port=" . $port .
+       ";dbname=" . DB_NAME .
+       ";charset=" . DB_CHARSET;
+
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

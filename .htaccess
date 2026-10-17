@@ -1,7 +1,7 @@
 # Sun Cosmetic - URL Rewriting
 
 RewriteEngine On
-RewriteBase /sun_cosmetic/
+RewriteBase /
 
 # Redirect to HTTPS (uncomment in production)
 # RewriteCond %{HTTPS} off
@@ -41,7 +41,7 @@ Options -Indexes
 </IfModule>
 
 # Custom error pages
-ErrorDocument 404 /sun_cosmetic/index.php?url=404
+ErrorDocument 404 /index.php?url=404
 <FilesMatch "^(.*\.sql)$">
 Require all denied
 </FilesMatch>
